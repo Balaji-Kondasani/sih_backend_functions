@@ -159,14 +159,18 @@ async function handleNewReport(report: any) {
   
   // --- 6. Update Report and Send Alert ---
   console.log(`Final determination for report ${report.id}: Risk Level = ${riskLevel}`);
-  await supabaseAdmin
-    .from("reports")
-    .update({ 
-      risk_level: riskLevel, 
-      weather_snapshot: weatherInfo, 
-      analysis_notes: analysisNotes.join(" ") 
-    })
-    .eq("id", report.id);
+  const { error: updateError } = await supabaseAdmin
+  .from("reports")
+  .update({ 
+    risk_level: riskLevel, 
+    weather_snapshot: weatherInfo, 
+    analysis_notes: analysisNotes.join(" ")
+  })
+  .eq("id", report.id);
+
+if (updateError) {
+  console.error("Error updating report:", updateError.message);
+}
 
   if (riskLevel === "High") {
     console.log("High risk detected. Sending SMS alert via Twilio...");
